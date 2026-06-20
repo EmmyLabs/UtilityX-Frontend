@@ -46,7 +46,7 @@ npm install
 or for React Native
 
 ```bash
-flutter pub get
+npx expo start
 ```
 
 3. Start the development server
@@ -58,7 +58,7 @@ npm run dev
 or
 
 ```bash
-flutter run
+expo start
 ```
 
 ## Responsibilities of this Repository

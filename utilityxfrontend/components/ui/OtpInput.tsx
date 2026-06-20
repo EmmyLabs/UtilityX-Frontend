@@ -7,38 +7,53 @@ interface OtpInputProps {
   length?: number;
   value: string[];
   onChange: (value: string[]) => void;
+  label?: string;
   error?: string;
 }
 
-export default function OtpInput({ length = 6, value, onChange, error }: OtpInputProps) {
+export default function OtpInput({
+  length = 6,
+  value,
+  onChange,
+  label,
+  error,
+}: OtpInputProps) {
   const refs = useRef<(HTMLInputElement | null)[]>([]);
-  const focus = (i: number) => refs.current[i]?.focus();
 
-  const handleChange = (i: number, char: string) => {
+  const focus = (index: number) => refs.current[index]?.focus();
+
+  const handleChange = (index: number, char: string) => {
     if (!/^\d*$/.test(char)) return;
     const next = [...value];
-    next[i] = char.slice(-1);
+    next[index] = char.slice(-1);
     onChange(next);
-    if (char && i < length - 1) focus(i + 1);
+    if (char && index < length - 1) focus(index + 1);
   };
 
-  const handleKeyDown = (i: number, e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !value[i] && i > 0) focus(i - 1);
-    if (e.key === "ArrowLeft"  && i > 0)            focus(i - 1);
-    if (e.key === "ArrowRight" && i < length - 1)   focus(i + 1);
+  const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !value[index] && index > 0) focus(index - 1);
+    if (e.key === "ArrowLeft" && index > 0) focus(index - 1);
+    if (e.key === "ArrowRight" && index < length - 1) focus(index + 1);
   };
 
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, length);
     const next = [...value];
-    pasted.split("").forEach((c, i) => { next[i] = c; });
+    pasted.split("").forEach((char, i) => { next[i] = char; });
     onChange(next);
-    focus(Math.min(pasted.length, length - 1));
+    const lastFilled = Math.min(pasted.length, length - 1);
+    focus(lastFilled);
   };
 
   return (
     <div className="space-y-3">
+      {label && (
+        <label className="text-xs font-semibold tracking-widest uppercase text-[#8A94A6]">
+          {label}
+        </label>
+      )}
+
       <div className="flex gap-3 justify-center">
         {Array.from({ length }).map((_, i) => (
           <input
@@ -53,13 +68,23 @@ export default function OtpInput({ length = 6, value, onChange, error }: OtpInpu
             onPaste={handlePaste}
             aria-label={`OTP digit ${i + 1}`}
             className={cn(
-              "w-12 h-14 text-center text-xl font-bold text-white bg-[#0F162D] border-2 rounded-xl focus:outline-none transition-all caret-[#5B3DF5]",
-              error ? "border-[#FF5A6E]" : value[i] ? "border-[#5B3DF5]" : "border-[#1E2742] focus:border-[#5B3DF5]"
+              "w-12 h-14 text-center text-xl font-bold text-white",
+              "bg-[#0F162D] border-2 rounded-xl",
+              "focus:outline-none focus:ring-0 transition-all",
+              "caret-[#5B3DF5]",
+              error
+                ? "border-[#FF5A6E]"
+                : value[i]
+                ? "border-[#5B3DF5]"
+                : "border-[#1E2742] focus:border-[#5B3DF5]"
             )}
           />
         ))}
       </div>
-      {error && <p className="text-xs text-[#FF5A6E] text-center">{error}</p>}
+
+      {error && (
+        <p className="text-xs text-[#FF5A6E] text-center">{error}</p>
+      )}
     </div>
   );
 }

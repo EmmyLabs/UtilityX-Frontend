@@ -3,8 +3,13 @@ import GlassCard from "@/components/ui/GlassCard";
 
 export default function HeroBrand() {
   return (
+    /*
+     * mobile  (<768px): hidden
+     * tablet  (768–1023px): 50% width, h-full to fill the flex row
+     * desktop (1024px+):    58% width
+     */
     <section className="hidden md:flex flex-col justify-between md:w-1/2 lg:w-[58%] h-full relative overflow-hidden px-8 lg:px-12 pt-8 pb-6">
-      {/* Background overlay */}
+      {/* Background image overlay */}
       <div
         className="absolute inset-0 z-0 opacity-[0.06] bg-cover bg-center pointer-events-none"
         style={{
@@ -13,18 +18,30 @@ export default function HeroBrand() {
         }}
       />
 
-      {/* Logo — single reusable component, always /Logo.jpeg */}
-      <div className="relative z-10 shrink-0">
-        <Logo size="md" />
+      {/* Logo */}
+      <div className="relative z-10 flex items-center gap-3 shrink-0">
+        <div className="w-10 h-10 rounded-xl overflow-hidden brand-gradient-bg flex items-center justify-center shrink-0">
+          <Image
+            src="/Logo.jpeg"
+            alt="FusePay Logo"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-cover"
+          />
+        </div>
+        <span className="text-xl font-bold tracking-tight text-white font-[family-name:var(--font-display)]">
+          FusePay
+        </span>
       </div>
 
-      {/* Hero copy pushed to bottom */}
+      {/* Hero copy — pushed to bottom via mt-auto */}
       <div className="relative z-10 mt-auto animate-float pb-2">
         <h1 className="text-[30px] md:text-[36px] lg:text-[46px] leading-[1.1] font-extrabold mb-4 tracking-tight text-white font-[family-name:var(--font-display)]">
           The trusted marketplace for{" "}
           <span className="brand-gradient-text">airtime, data,</span> and{" "}
           <span className="brand-gradient-text">gift cards.</span>
         </h1>
+
         <p className="text-[#C8D1E6] text-sm lg:text-base leading-relaxed mb-6 max-w-[360px]">
           Experience the future of digital finance. Secure, fast, and built for
           the modern Web3 era.

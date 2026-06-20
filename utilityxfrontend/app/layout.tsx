@@ -38,7 +38,7 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full antialiased overflow-x-hidden" suppressHydrationWarning>
-        <AuthProvider>{children}</AuthProvider>
+        {children}
       </body>
     </html>
   );

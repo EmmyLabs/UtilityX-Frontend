@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Logo from "@/components/ui/Logo";
 import GlassCard from "@/components/ui/GlassCard";
 
 export default function HeroBrand() {
@@ -47,7 +47,6 @@ export default function HeroBrand() {
           the modern Web3 era.
         </p>
 
-        {/* Feature pills */}
         <div className="flex flex-col sm:flex-row gap-3">
           <GlassCard className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-9 h-9 rounded-lg bg-[#5B3DF5]/25 flex items-center justify-center shrink-0">

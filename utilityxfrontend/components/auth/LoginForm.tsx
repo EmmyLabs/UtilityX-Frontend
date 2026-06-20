@@ -2,16 +2,27 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+import Logo from "@/components/ui/Logo";
 import InputField from "@/components/ui/InputField";
 import BrandButton from "@/components/ui/BrandButton";
 import SocialButton from "@/components/ui/SocialButton";
+import AuthDivider from "@/components/ui/AuthDivider";
 import { GoogleIcon, AppleIcon } from "@/components/icons/SocialIcons";
+import { useAuth } from "@/context/AuthContext";
+import * as authService from "@/lib/mock/authService";
 
 export default function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   };
 
@@ -41,7 +52,6 @@ export default function LoginForm() {
         </div>
 
         <div className="w-full max-w-[400px]">
-          {/* Heading */}
           <div className="mb-7">
             <h2 className="text-2xl lg:text-[26px] font-bold text-white mb-1.5 font-[family-name:var(--font-display)]">
               Welcome Back
@@ -51,15 +61,23 @@ export default function LoginForm() {
             </p>
           </div>
 
-          {/* Form */}
+          {/* Global error */}
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-xl bg-[#FF5A6E]/10 border border-[#FF5A6E]/30 text-[#FF5A6E] text-sm">
+              {error}
+            </div>
+          )}
+
           <form className="space-y-5" onSubmit={handleSubmit} noValidate>
             <InputField
-              id="email"
+              id="identifier"
               type="text"
               label="Email or Phone Number"
               icon="person"
               placeholder="example@fusepay.com"
               autoComplete="email"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
             />
 
@@ -68,16 +86,15 @@ export default function LoginForm() {
               type={showPassword ? "text" : "password"}
               label="Password"
               labelRight={
-                <Link
-                  href="/forgot-password"
-                  className="text-xs font-semibold text-[#8A94A6] hover:text-[#5B3DF5] transition-colors"
-                >
+                <Link href="/forgot-password" className="text-xs font-semibold text-[#8A94A6] hover:text-[#5B3DF5] transition-colors">
                   Forgot password?
                 </Link>
               }
               icon="lock"
               placeholder="••••••••"
               autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               suffix={
                 <button

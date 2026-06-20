@@ -18,7 +18,7 @@ The frontend communicates with the backend API to execute transactions and retri
 
 ## Tech Stack
 
-* Flutter (Mobile Application)
+* React Native (Mobile Application)
 * Next.js / React (Web Dashboard)
 * REST API integration
 * State management and secure authentication
@@ -43,7 +43,7 @@ src/
 npm install
 ```
 
-or for Flutter
+or for React Native
 
 ```bash
 flutter pub get

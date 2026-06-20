@@ -28,16 +28,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakarta.variable} ${hankenGrotesk.variable}`}
+      className={`${plusJakarta.variable} ${hankenGrotesk.variable} h-full`}
     >
       <head>
-        {/* Material Symbols — loaded via <link> to avoid CSS @import ordering issues */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
       </head>
-      <body className="antialiased" suppressHydrationWarning>
+      <body className="h-full antialiased overflow-x-hidden" suppressHydrationWarning>
         {children}
       </body>
     </html>

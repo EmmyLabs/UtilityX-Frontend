@@ -1,7 +1,7 @@
-# UtilityX Frontend
+# FusePay Frontend
 
-The UtilityX Frontend provides the user interface for the UtilityX platform.
-It allows users to interact with the peer-to-peer utility marketplace, manage their wallets, and perform transactions.
+The FusePay Frontend provides the user interface for the FusePay platform.
+It allows users to interact with the peer-to-peer FusePay marketplace, manage their wallets, and perform transactions.
 
 ## Overview
 

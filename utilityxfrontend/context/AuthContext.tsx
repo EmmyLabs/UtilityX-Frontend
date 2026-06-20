@@ -10,18 +10,17 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import type { AuthUser, AuthSession } from "@/lib/mock/types";
-import { logout } from "@/lib/mock/authService";
+import * as authService from "@/lib/mock/authService";
 
-// ─── Shape ────────────────────────────────────────────────────────────────────
+// ─── Context shape ────────────────────────────────────────────────────────────
 
 interface AuthContextValue {
   user: AuthUser | null;
   token: string | null;
   isLoading: boolean;
-  /** Phone awaiting OTP — passed from Register → OTP → CreatePin */
+  /** Phone awaiting OTP verification — shared between Register → OTP steps */
   pendingPhone: string | null;
   setPendingPhone: (phone: string | null) => void;
-  /** Called after login or createPin succeeds */
   signIn: (session: AuthSession) => void;
   signOut: () => Promise<void>;
 }
@@ -30,7 +29,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const SESSION_KEY = "fp_session";
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
+// ─── Provider ────────────────────────────────────────────────────────────────
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -39,20 +38,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
 
-  // Restore session from sessionStorage on first render
+  // Restore session from sessionStorage on mount
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem(SESSION_KEY);
-      if (raw) {
-        const session: AuthSession = JSON.parse(raw);
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved) {
+      try {
+        const session: AuthSession = JSON.parse(saved);
         setUser(session.user);
         setToken(session.token);
+      } catch {
+        sessionStorage.removeItem(SESSION_KEY);
       }
-    } catch {
-      sessionStorage.removeItem(SESSION_KEY);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   }, []);
 
   const signIn = useCallback((session: AuthSession) => {
@@ -62,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    if (token) await logout(token).catch(() => {});
+    if (token) await authService.logout(token);
     setUser(null);
     setToken(null);
     sessionStorage.removeItem(SESSION_KEY);
@@ -71,7 +69,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, pendingPhone, setPendingPhone, signIn, signOut }}
+      value={{
+        user,
+        token,
+        isLoading,
+        pendingPhone,
+        setPendingPhone,
+        signIn,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

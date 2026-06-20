@@ -10,7 +10,7 @@ import SocialButton from "@/components/ui/SocialButton";
 import AuthDivider from "@/components/ui/AuthDivider";
 import { GoogleIcon, AppleIcon } from "@/components/icons/SocialIcons";
 import { useAuth } from "@/context/AuthContext";
-import { login } from "@/lib/mock/authService";
+import * as authService from "@/lib/mock/authService";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -61,9 +61,9 @@ export default function LoginForm() {
             </p>
           </div>
 
-          {/* Error banner */}
+          {/* Global error */}
           {error && (
-            <div className="mb-5 px-4 py-3 rounded-xl bg-[#FF5A6E]/10 border border-[#FF5A6E]/30 text-[#FF5A6E] text-sm">
+            <div className="mb-4 px-4 py-3 rounded-xl bg-[#FF5A6E]/10 border border-[#FF5A6E]/30 text-[#FF5A6E] text-sm">
               {error}
             </div>
           )}

@@ -1,162 +1,170 @@
 /**
  * Mock Auth Service
  * -----------------
- * Simulates real backend auth with network latency.
- * Replace each function body with real API calls when backend is ready.
+ * Simulates network latency (400–900ms) and deterministic outcomes so the
+ * entire auth flow (Register → OTP → Create PIN → Login) can be exercised
+ * end-to-end without a real backend.
  *
- * DEV credentials:
- *   Login:  demo@fusepay.com  /  any password
- *   OTP:    123456  (always)
+ * Replace each function body with a real fetch/axios call when the API is ready.
  */
 
 import type { ApiResponse, AuthSession, AuthUser } from "./types";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const randDelay = () => delay(400 + Math.random() * 500);
 
-// ─── In-memory store (resets on page refresh — expected for mock) ─────────────
+const rand = (min: number, max: number) =>
+  Math.floor(Math.random() * (max - min + 1)) + min;
 
-interface UserRecord {
-  phone: string;
-  password: string;
-  pin: string;
-  name: string;
+const fakeDelay = () => delay(rand(400, 900));
+
+// In-memory store (resets on page refresh — expected for a mock)
+interface MockStore {
+  users: Record<string, { phone: string; password: string; pin: string; name: string }>;
+  otpStore: Record<string, string>;   // phone → otp
+  sessions: Record<string, string>;   // token → phone
+  pendingPhone: string | null;        // phone awaiting OTP
 }
 
-const store: {
-  users: Record<string, UserRecord>;
-  otpCodes: Record<string, string>;
-  sessions: Record<string, string>; // token → phone
-  pendingPhone: string | null;
-} = {
+const store: MockStore = {
   users: {},
-  otpCodes: {},
+  otpStore: {},
   sessions: {},
   pendingPhone: null,
 };
 
+// ─── Mock OTP (always "123456" in dev) ───────────────────────────────────────
 const MOCK_OTP = "123456";
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ─── Auth Service ────────────────────────────────────────────────────────────
 
 /**
- * Step 1 — Register: creates user, "sends" OTP, returns phone for OTP screen.
+ * Register a new user.
+ * Stores credentials, sends a mock OTP, and returns the phone for the OTP step.
  */
 export async function register(
   phone: string,
   password: string
 ): Promise<ApiResponse<{ phone: string }>> {
-  await randDelay();
+  await fakeDelay();
 
-  const key = phone.replace(/\s/g, "");
+  const normalized = phone.replace(/\s/g, "");
 
-  if (store.users[key]) {
+  if (store.users[normalized]) {
     return { ok: false, error: "An account with this phone number already exists." };
   }
   if (password.length < 8) {
     return { ok: false, error: "Password must be at least 8 characters." };
   }
 
-  store.users[key] = { phone: key, password, pin: "", name: `User ${key.slice(-4)}` };
-  store.otpCodes[key] = MOCK_OTP;
-  store.pendingPhone = key;
+  // Store user (no OTP yet — sent separately)
+  store.users[normalized] = {
+    phone: normalized,
+    password,
+    pin: "",
+    name: `User ${normalized.slice(-4)}`,
+  };
 
-  // Dev hint in console
-  console.info(`[MockAuth] OTP for ${key}: ${MOCK_OTP}`);
+  // "Send" OTP
+  store.otpStore[normalized] = MOCK_OTP;
+  store.pendingPhone = normalized;
 
-  return { ok: true, data: { phone: key } };
+  console.info(`[MockAuth] OTP for ${normalized}: ${MOCK_OTP}`);
+
+  return { ok: true, data: { phone: normalized } };
 }
 
 /**
- * Step 2 — Verify OTP.
+ * Resend OTP (same mock code, resets timer).
+ */
+export async function resendOtp(phone: string): Promise<ApiResponse> {
+  await fakeDelay();
+  const normalized = phone.replace(/\s/g, "");
+  store.otpStore[normalized] = MOCK_OTP;
+  console.info(`[MockAuth] Resent OTP for ${normalized}: ${MOCK_OTP}`);
+  return { ok: true };
+}
+
+/**
+ * Verify OTP.
+ * Returns a temporary token used to authorise the PIN creation step.
  */
 export async function verifyOtp(
   phone: string,
   otp: string
 ): Promise<ApiResponse<{ tempToken: string }>> {
-  await randDelay();
+  await fakeDelay();
 
-  const key = phone.replace(/\s/g, "");
-  const expected = store.otpCodes[key];
+  const normalized = phone.replace(/\s/g, "");
+  const expected = store.otpStore[normalized];
 
-  if (!expected) return { ok: false, error: "No OTP was sent to this number. Please register first." };
-  if (otp !== expected) return { ok: false, error: "Incorrect code. Please check and try again." };
+  if (!expected) return { ok: false, error: "No OTP was sent to this number." };
+  if (otp !== expected) return { ok: false, error: "Incorrect code. Please try again." };
 
-  delete store.otpCodes[key];
+  // Clear OTP
+  delete store.otpStore[normalized];
+  const tempToken = `tmp_${normalized}_${Date.now()}`;
 
-  return { ok: true, data: { tempToken: `tmp_${key}_${Date.now()}` } };
+  return { ok: true, data: { tempToken } };
 }
 
 /**
- * Resend OTP — resets the code.
- */
-export async function resendOtp(phone: string): Promise<ApiResponse> {
-  await randDelay();
-  const key = phone.replace(/\s/g, "");
-  store.otpCodes[key] = MOCK_OTP;
-  console.info(`[MockAuth] Resent OTP for ${key}: ${MOCK_OTP}`);
-  return { ok: true };
-}
-
-/**
- * Step 3 — Create PIN, completes registration, returns a full session.
+ * Set transaction PIN.
+ * Completes registration and returns a full auth session.
  */
 export async function createPin(
   phone: string,
   pin: string
 ): Promise<ApiResponse<AuthSession>> {
-  await randDelay();
+  await fakeDelay();
 
-  const key = phone.replace(/\s/g, "");
-  const user = store.users[key];
+  const normalized = phone.replace(/\s/g, "");
+  const user = store.users[normalized];
 
-  if (!user) return { ok: false, error: "User not found. Please register again." };
-  if (!/^\d{4}$/.test(pin)) return { ok: false, error: "PIN must be exactly 4 digits." };
+  if (!user) return { ok: false, error: "User not found." };
+  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+    return { ok: false, error: "PIN must be exactly 4 digits." };
+  }
 
   user.pin = pin;
+  user.name = `User ${normalized.slice(-4)}`;
 
   const token = `tok_${Math.random().toString(36).slice(2)}`;
-  store.sessions[token] = key;
+  store.sessions[token] = normalized;
 
-  return {
-    ok: true,
-    data: {
-      user: { id: key, phone: key, name: user.name, hasPin: true },
-      token,
-    },
+  const session: AuthSession = {
+    user: { id: normalized, phone: normalized, name: user.name, hasPin: true },
+    token,
   };
+
+  return { ok: true, data: session };
 }
 
 /**
- * Login — returns a full session.
- * Demo shortcut: demo@fusepay.com with ANY password always works.
+ * Sign in with phone + password.
+ * Returns a full auth session.
  */
 export async function login(
-  identifier: string,
+  phoneOrEmail: string,
   password: string
 ): Promise<ApiResponse<AuthSession>> {
-  await randDelay();
+  await fakeDelay();
 
-  const key = identifier.replace(/\s/g, "");
+  const normalized = phoneOrEmail.replace(/\s/g, "");
+  const user = store.users[normalized];
 
-  // Demo account — always succeeds
-  const isDemo = key === "demo@fusepay.com" || key === "+2348000000000";
+  // Demo shortcut — a hardcoded test account always works
+  const isDemoAccount =
+    normalized === "demo@fusepay.com" || normalized === "+2348000000000";
 
-  if (!isDemo) {
-    const user = store.users[key];
-    if (!user || user.password !== password) {
-      return { ok: false, error: "Incorrect phone number or password." };
-    }
+  if (!isDemoAccount && (!user || user.password !== password)) {
+    return { ok: false, error: "Invalid credentials. Please try again." };
   }
 
-  const resolvedUser: AuthUser = isDemo
+  const resolvedUser: AuthUser = isDemoAccount
     ? { id: "demo", phone: "+2348000000000", name: "Demo User", hasPin: true }
-    : (() => {
-        const u = store.users[key];
-        return { id: key, phone: u.phone, name: u.name, hasPin: !!u.pin };
-      })();
+    : { id: normalized, phone: user.phone, name: user.name, hasPin: !!user.pin };
 
   const token = `tok_${Math.random().toString(36).slice(2)}`;
   store.sessions[token] = resolvedUser.phone;
@@ -165,19 +173,39 @@ export async function login(
 }
 
 /**
- * Logout — removes the session token.
+ * Sign out — invalidates the token.
  */
 export async function logout(token: string): Promise<ApiResponse> {
-  await randDelay();
+  await fakeDelay();
   delete store.sessions[token];
   return { ok: true };
 }
 
-/** Get/set the phone awaiting OTP — shared between Register → OTP steps */
+/**
+ * Validate a session token (used on page load to restore auth state).
+ */
+export async function validateSession(
+  token: string
+): Promise<ApiResponse<AuthUser>> {
+  await fakeDelay();
+
+  const phone = store.sessions[token];
+  if (!phone) return { ok: false, error: "Session expired." };
+
+  const user = store.users[phone];
+  if (!user) return { ok: false, error: "User not found." };
+
+  return {
+    ok: true,
+    data: { id: phone, phone: user.phone, name: user.name, hasPin: !!user.pin },
+  };
+}
+
+/** Expose the pending phone between Register → OTP steps */
 export function getPendingPhone(): string | null {
   return store.pendingPhone;
 }
 
-export function setPendingPhone(phone: string | null): void {
+export function setPendingPhone(phone: string | null) {
   store.pendingPhone = phone;
 }

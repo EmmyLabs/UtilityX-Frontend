@@ -24,31 +24,31 @@ export default function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
+    if (!identifier.trim()) { setError("Please enter your phone number or email."); return; }
+    if (!password)           { setError("Please enter your password."); return; }
+
+    setLoading(true);
+    const res = await login(identifier.trim(), password);
+    setLoading(false);
+
+    if (!res.ok || !res.data) {
+      setError(res.error ?? "Login failed. Please try again.");
+      return;
+    }
+
+    signIn(res.data);
+    router.push("/dashboard");
   };
 
   return (
-    /*
-     * mobile  (<768px): full width, scrolls independently
-     * tablet  (768px+): right panel, h-full to fill the flex row, overflow-y-auto
-     * No ghost text — it was causing horizontal scroll via whitespace-nowrap overflow
-     */
     <section className="relative z-10 w-full md:w-1/2 lg:w-[42%] h-full bg-[#0F162D] md:border-l md:border-[#1E2742]/50 flex flex-col overflow-y-auto">
       <div className="flex flex-col items-center justify-center flex-1 py-10 px-6 sm:px-10 md:px-8 lg:px-12">
 
-        {/* Mobile-only logo */}
-        <div className="md:hidden flex items-center gap-2 mb-10 self-start w-full">
-          <div className="w-9 h-9 rounded-xl overflow-hidden brand-gradient-bg flex items-center justify-center shrink-0">
-            <Image
-              src="/Logo.jpeg"
-              alt="FusePay Logo"
-              width={36}
-              height={36}
-              className="w-9 h-9 object-cover"
-            />
-          </div>
-          <span className="text-lg font-bold text-white font-[family-name:var(--font-display)]">
-            FusePay
-          </span>
+        {/* Mobile logo — reusable Logo component */}
+        <div className="md:hidden self-start mb-10">
+          <Logo size="sm" />
         </div>
 
         <div className="w-full max-w-[400px]">
@@ -82,7 +82,7 @@ export default function LoginForm() {
             />
 
             <InputField
-              id="password"
+              id="login-password"
               type={showPassword ? "text" : "password"}
               label="Password"
               labelRight={
@@ -97,44 +97,44 @@ export default function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               required
               suffix={
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="text-[#8A94A6] hover:text-white transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[20px]">
-                    {showPassword ? "visibility_off" : "visibility"}
-                  </span>
+                <button type="button" onClick={() => setShowPassword((p) => !p)} aria-label={showPassword ? "Hide password" : "Show password"} className="text-[#8A94A6] hover:text-white transition-colors cursor-pointer">
+                  <span className="material-symbols-outlined text-[20px]">{showPassword ? "visibility_off" : "visibility"}</span>
                 </button>
               }
             />
 
-            <BrandButton type="submit" className="h-14 text-base">
-              <span>Sign In</span>
-              <span className="material-symbols-outlined text-[18px]">login</span>
+            <BrandButton type="submit" disabled={loading} className="h-14 text-base disabled:opacity-60">
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing in…
+                </span>
+              ) : (
+                <>
+                  <span>Sign In</span>
+                  <span className="material-symbols-outlined text-[18px]">login</span>
+                </>
+              )}
             </BrandButton>
 
-            <div className="relative flex items-center py-1">
-              <div className="flex-grow border-t border-[#1E2742]" />
-              <span className="flex-shrink mx-4 text-[10px] font-semibold tracking-widest uppercase text-[#8A94A6]">
-                Or continue with
-              </span>
-              <div className="flex-grow border-t border-[#1E2742]" />
-            </div>
+            <AuthDivider />
 
             <div className="grid grid-cols-2 gap-3">
-              <SocialButton icon={<GoogleIcon />} label="Google" type="button" aria-label="Sign in with Google" className="h-12" />
-              <SocialButton icon={<AppleIcon />} label="Apple" type="button" aria-label="Sign in with Apple" className="h-12" />
+              <SocialButton icon={<GoogleIcon />} label="Google" type="button" className="h-12" />
+              <SocialButton icon={<AppleIcon />} label="Apple"  type="button" className="h-12" />
             </div>
           </form>
 
-          <div className="mt-8 text-center">
+          {/* Dev hint */}
+          <div className="mt-4 px-4 py-3 rounded-xl bg-[#5B3DF5]/10 border border-[#5B3DF5]/20 text-xs text-[#8A94A6]">
+            <span className="text-[#a78bfa] font-semibold">Demo: </span>
+            Use <span className="text-white font-mono">demo@fusepay.com</span> with any password.
+          </div>
+
+          <div className="mt-6 text-center">
             <p className="text-[#C8D1E6] text-sm">
               Don&apos;t have an account?{" "}
-              <Link href="/register" className="text-[#5B3DF5] font-bold hover:underline">
-                Create Account
-              </Link>
+              <Link href="/register" className="text-[#5B3DF5] font-bold hover:underline">Create Account</Link>
             </p>
           </div>
         </div>

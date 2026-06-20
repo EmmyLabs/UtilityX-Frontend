@@ -38,7 +38,8 @@ export default function RootLayout({
         />
       </head>
       <body className="h-full antialiased overflow-x-hidden" suppressHydrationWarning>
-        {children}
+        {/* AuthProvider wraps everything so auth state is available on auth pages too */}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

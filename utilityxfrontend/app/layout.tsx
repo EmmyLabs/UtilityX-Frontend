@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Hanken_Grotesk } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -28,17 +29,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${plusJakarta.variable} ${hankenGrotesk.variable}`}
+      className={`${plusJakarta.variable} ${hankenGrotesk.variable} h-full`}
     >
       <head>
-        {/* Material Symbols — loaded via <link> to avoid CSS @import ordering issues */}
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
       </head>
-      <body className="antialiased" suppressHydrationWarning>
-        {children}
+      <body className="h-full antialiased overflow-x-hidden" suppressHydrationWarning>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

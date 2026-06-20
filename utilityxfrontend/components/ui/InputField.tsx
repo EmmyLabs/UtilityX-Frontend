@@ -6,10 +6,11 @@ interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   labelRight?: ReactNode;
   icon?: string; // Material Symbol name
   suffix?: ReactNode;
+  hint?: string;
 }
 
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-  ({ label, labelRight, icon, suffix, className, id, ...props }, ref) => {
+  ({ label, labelRight, icon, suffix, hint, className, id, ...props }, ref) => {
     return (
       <div className="space-y-2">
         {(label || labelRight) && (
@@ -38,7 +39,7 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             id={id}
             {...props}
             className={cn(
-              "w-full bg-[#131A2E] border border-[#1E2742] text-white rounded-xl",
+              "w-full bg-[#0F162D] border border-[#1E2742] text-white rounded-xl",
               "py-3.5 pr-4 focus:outline-none",
               "focus:ring-2 focus:ring-[#5B3DF5]/50 focus:border-[#5B3DF5]",
               "transition-all text-sm placeholder:text-[#8A94A6]",
@@ -54,6 +55,10 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
             </div>
           )}
         </div>
+
+        {hint && (
+          <p className="text-xs text-[#8A94A6]">{hint}</p>
+        )}
       </div>
     );
   }

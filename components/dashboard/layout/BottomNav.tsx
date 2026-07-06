@@ -14,7 +14,7 @@ interface BottomNavItem {
 const navItems: BottomNavItem[] = [
   { href: "/dashboard", label: "Home", icon: "home" },
   { href: "/dashboard/market", label: "Market", icon: "storefront" },
-  { href: "/dashboard/scan", label: "Scan", icon: "qr_code_scanner", isFab: true },
+  { href: "/dashboard/swap", label: "Swap", icon: "swap_vert", isFab: true },
   { href: "/dashboard/trades", label: "Trades", icon: "swap_horiz" },
   { href: "/dashboard/profile", label: "Profile", icon: "person" },
 ];

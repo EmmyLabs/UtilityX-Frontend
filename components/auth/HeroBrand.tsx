@@ -20,18 +20,7 @@ export default function HeroBrand() {
 
       {/* Logo */}
       <div className="relative z-10 flex items-center gap-3 shrink-0">
-        <div className="w-10 h-10 rounded-xl overflow-hidden brand-gradient-bg flex items-center justify-center shrink-0">
-          <Image
-            src="/Logo.jpeg"
-            alt="FusePay Logo"
-            width={40}
-            height={40}
-            className="w-10 h-10 object-cover"
-          />
-        </div>
-        <span className="text-xl font-bold tracking-tight text-white font-[family-name:var(--font-display)]">
-          FusePay
-        </span>
+        <Logo variant="color" size="md" showText={true} href="/" />
       </div>
 
       {/* Hero copy — pushed to bottom via mt-auto */}

@@ -15,8 +15,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "home" },
   { href: "/dashboard/market", label: "Market", icon: "storefront" },
+  { href: "/dashboard/swap", label: "Swap", icon: "swap_vert" },
   { href: "/dashboard/trades", label: "Trades", icon: "swap_horiz" },
-  { href: "/dashboard/wallet", label: "Wallet", icon: "account_balance_wallet" },
   { href: "/dashboard/profile", label: "Profile", icon: "person" },
 ];
 

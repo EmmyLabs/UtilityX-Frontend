@@ -65,3 +65,32 @@ export interface Notification {
   read: boolean;
   type: NotificationType;
 }
+
+// ─── Trade Types ─────────────────────────────────────────────────────────────
+
+export type TradeTab = "active" | "pending" | "completed" | "cancelled";
+
+export type TradeStatus = "Order Placed" | "Payment Locked" | "Awaiting Delivery" | "Completed";
+
+export interface TradeTimelineStep {
+  label: TradeStatus;
+  completed: boolean;
+  active: boolean;
+  time?: string;
+}
+
+export interface Trade {
+  id: string;
+  type: "buy" | "sell";
+  category: "airtime" | "data" | "gift-card";
+  network: string;
+  networkLogo: string;
+  productName: string;
+  validity?: string;
+  price: number;
+  quantity: number;
+  isBuyer: boolean;
+  tradePartner: string;
+  timeline: TradeTimelineStep[];
+  createdAt: string;
+}

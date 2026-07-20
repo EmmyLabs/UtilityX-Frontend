@@ -10,12 +10,12 @@ interface TopNavbarProps {
   sidebarCollapsed?: boolean;
 }
 
-const pageTitles: Record<string, string> = {
-  "/dashboard": "Home",
-  "/dashboard/market": "Marketplace",
-  "/dashboard/trades": "My Trades",
-  "/dashboard/swap": "Swap",
-  "/dashboard/profile": "Profile",
+const pageTitles: Record<string, { title: string; subtitle?: string }> = {
+  "/dashboard": { title: "Home" },
+  "/dashboard/market": { title: "Marketplace" },
+  "/dashboard/trades": { title: "My Trades" },
+  "/dashboard/swap": { title: "Swap", subtitle: "Swap your crypto to Naira or other crypto instantly" },
+  "/dashboard/profile": { title: "Profile" },
 };
 
 export default function TopNavbar({
@@ -25,7 +25,7 @@ export default function TopNavbar({
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const title = pageTitles[pathname] ?? "Dashboard";
+  const pageInfo = pageTitles[pathname] ?? { title: "Dashboard" };
 
   const initials = user?.name
     ? user.name
@@ -48,63 +48,18 @@ export default function TopNavbar({
         borderColor: "#1E2742",
       }}
     >
-      {/* Left: Page Title + Search */}
-      <div className="flex items-center gap-6 flex-1">
-        <h1 className="text-lg font-bold text-white">{title}</h1>
-
-        {/* Search Bar */}
-        <div className="relative max-w-md w-full">
-          <span
-            className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-xl"
-            style={{ color: "#8A94A6" }}
-          >
-            search
-          </span>
-          <input
-            type="text"
-            placeholder="Search services, transactions..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl text-sm border focus:outline-none focus:border-[#5B3DF5]/50"
-            style={{
-              backgroundColor: "#131A2E",
-              borderColor: "#1E2742",
-              color: "#FFFFFF",
-            }}
-          />
-        </div>
+      {/* Left: Page Title */}
+      <div>
+        <h1 className="text-2xl font-bold text-white font-[family-name:var(--font-display)]">{pageInfo.title}</h1>
+        {pageInfo.subtitle && (
+          <p className="text-sm mt-1" style={{ color: "#C8D1E6" }}>{pageInfo.subtitle}</p>
+        )}
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-3">
-        {/* Wallet Shortcut */}
-        <Link
-          href="/dashboard/wallet"
-          className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl border hover:border-[#5B3DF5]/50 transition-colors"
-          style={{
-            backgroundColor: "#131A2E",
-            borderColor: "#1E2742",
-          }}
-        >
-          <span
-            className="material-symbols-outlined text-xl"
-            style={{ color: "#22E6B8" }}
-          >
-            account_balance_wallet
-          </span>
-          <span className="text-sm font-semibold text-white">₦125,000</span>
-        </Link>
-
-        {/* Messages Icon */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#1E2742] transition-colors">
-          <span
-            className="material-symbols-outlined text-xl"
-            style={{ color: "#C8D1E6" }}
-          >
-            chat
-          </span>
-        </button>
-
+      <div className="flex items-center gap-4">
         {/* Notification Bell */}
-        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[#1E2742] transition-colors">
+        <button className="relative w-12 h-12 flex items-center justify-center rounded-xl border hover:bg-[#1E2742] transition-colors" style={{ backgroundColor: "#131A2E", borderColor: "#1E2742" }}>
           <span
             className="material-symbols-outlined text-xl"
             style={{ color: "#C8D1E6" }}
@@ -121,13 +76,41 @@ export default function TopNavbar({
           )}
         </button>
 
+        {/* Wallet Balance */}
+        <Link
+          href="/dashboard/wallet"
+          className="flex items-center gap-3 px-5 py-3 rounded-xl border hover:border-[#5B3DF5]/50 transition-colors"
+          style={{
+            backgroundColor: "#131A2E",
+            borderColor: "#1E2742",
+          }}
+        >
+          <div className="text-right">
+            <span className="text-base font-semibold text-white">₦125,000.00</span>
+            <p className="text-xs" style={{ color: "#8A94A6" }}>Wallet Balance</p>
+          </div>
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: "#8A94A6" }}
+          >
+            expand_more
+          </span>
+        </Link>
+
         {/* User Avatar */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full brand-gradient-bg flex items-center justify-center text-white text-xs font-bold">
-            {initials}
+          <div className="w-12 h-12 rounded-full overflow-hidden border" style={{ borderColor: "#22E6B8" }}>
+            <img 
+              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=faces" 
+              alt="User avatar"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <span className="text-sm font-medium text-white hidden lg:block">
-            {user?.name?.split(" ")[0] ?? "User"}
+          <span
+            className="material-symbols-outlined text-xl"
+            style={{ color: "#8A94A6" }}
+          >
+            expand_more
           </span>
         </div>
       </div>
